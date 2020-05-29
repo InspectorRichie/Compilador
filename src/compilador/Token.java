@@ -26,7 +26,19 @@ public class Token
 	public int getLinea() {
 		return linea;
 	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public void setValor(String valor) {
+		this.valor = valor;
+	}
+	public void setTipo(int tipo) {
+		this.tipo = tipo;
+	}
 	public String toString() {
+		return "Token " + valor + ": { id: "+id+", linea: "+linea+", tipo: " + Statics.tipoDeToken[tipo] + " }";
+	}
+	public String toStringConSalto() {
 		return "Token " + valor + ":"
 			+ "\n{"
 			+ "\n\tid: "+id+","
@@ -34,7 +46,7 @@ public class Token
 			+ "\n\ttipo: " + Statics.tipoDeToken[tipo]
 			+ "\n}";
 	}
-	public String toHTML() {
+	protected String toHTML() {
 		return "Token <b>" + valor + "</b>: {<br />"
 				+ "&nbsp;&nbsp;&nbsp;&nbsp;id: "+id+",<br />"
 				+ "&nbsp;&nbsp;&nbsp;&nbsp;linea: "+linea+",<br />"

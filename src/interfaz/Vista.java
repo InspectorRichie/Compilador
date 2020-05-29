@@ -13,13 +13,16 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -34,6 +37,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.tools.ToolProvider;
@@ -63,7 +67,7 @@ public class Vista extends JFrame implements Serializable {
 	public ListaDoble<Integer> tamañoTextoDelEditor;
 	public ListaDoble<Boolean> cambiosGuardados;
 	public ListaDoble<PanelPestaña> titulo;
-	public JList<String> consola;
+	public JList<String> consola, cuadruplos;
 	public Escuchadores escuchadores;
 	public int tabulaciones = 0,
 		posicionRelativaDelDividorDeLosTabbedPane = 0;
@@ -82,7 +86,8 @@ public class Vista extends JFrame implements Serializable {
 		icoCerrarPestaña;
 	private int contadorDePestañas = 0;
 	private Object[] sesion;
-	public Font fontHeader = new Font("Arial", Font.BOLD, 17);
+	public Font fontHeader = new Font("Arial", Font.BOLD, 17),
+			fuenteConsola = new Font("Consolas", Font.PLAIN, 16);
 
 	public Vista() {
 		super(" Compilador ");
@@ -259,16 +264,23 @@ public class Vista extends JFrame implements Serializable {
 	private void crearPestañasDeAbajo() {
 		bottomTabs = new JTabbedPane();
 		consola=new JList<String>();
-		consola.setFont(new Font("Consolas", Font.PLAIN, 16));
+		cuadruplos = new JList<String>();
+		consola.setFont(fuenteConsola);
+		cuadruplos.setFont(fuenteConsola);
+		DefaultListCellRenderer renderer = (DefaultListCellRenderer)cuadruplos.getCellRenderer();
+		renderer.setHorizontalAlignment(SwingConstants.CENTER);
 		JScrollPane pestañaConsola = new JScrollPane(consola);
+		JScrollPane pestañaCuadruplos = new JScrollPane(cuadruplos);
 		modelo = new DefaultTableModel(new Object[0][0], tituloTabla);
 		tablaDatos = new JTable(modelo);
 		tablaDatos.getTableHeader().setFont(fontHeader);
 		JScrollPane pestañaDatos = new JScrollPane(tablaDatos);
 		pestañaConsola.setFocusable(false);
+		pestañaCuadruplos.setFocusable(false);
 		pestañaDatos.setFocusable(false);
 		bottomTabs.insertTab("Consola", icoBug, pestañaConsola, "Consola con información del último código compilado", 0);
 		bottomTabs.insertTab("Datos", icoTable, pestañaDatos, "Tabla con datos guardados del último código compilado", 1);
+		bottomTabs.insertTab("Cuadruplos", icoTable, pestañaCuadruplos, "Tablas de cuadruplos de expresiones encontradas en el último código compilado", 2);
 		
 		dividor = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		posicionRelativaDelDividorDeLosTabbedPane = 300;
@@ -302,6 +314,7 @@ public class Vista extends JFrame implements Serializable {
 			// Paneles de las pestañas
 				tablaDatos.setFocusable(false);
 				consola.setFocusable(false); // la wea de la pestaña Consola
+				cuadruplos.setFocusable(false); 
 				
 			// Los menus
 				menuArchivo.setFocusable(false);
@@ -349,7 +362,13 @@ public class Vista extends JFrame implements Serializable {
 				texto = "Escriba su codigo aqui.";
 				tamaño = texto.length();
 			}
-			JTextPane cajaDeTexto = new JTextPane();
+			JTextPane cajaDeTexto = new JTextPane() {
+				public boolean getScrollableTracksViewportWidth()
+			    {
+			        return getUI().getPreferredSize(this).width 
+			            <= getParent().getSize().width;
+			    }
+			};
 			cajaDeTexto.setText(texto);
 			txtCodigo.insertar(cajaDeTexto);
 			cajaDeTexto.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -442,32 +461,25 @@ public class Vista extends JFrame implements Serializable {
 	
 	private void cargarArchivo(String ruta) {
 		try {
-			FileReader archivo;
-			BufferedReader lector;
+			InputStreamReader inputStreamReader;
 			File fichero = new File(ruta);
-			archivo = new FileReader(fichero);
+			FileInputStream ficheroInputStream = new FileInputStream(fichero);
+			inputStreamReader =
+				new InputStreamReader(ficheroInputStream, Charset.forName("UTF-8"));
 			String texto = "";
-			if(archivo.ready()) {
-				lector = new BufferedReader(archivo);
-				
-				String linea = "";
-				String str = "";
-				while (linea != null) {
-					linea = lector.readLine();
-					if(linea == null)
-						break;
-					if(linea.length()>0)
-						str+= linea + "\n";
+			int dato = inputStreamReader.read();
+			if(inputStreamReader.ready()) {
+				while(dato != -1) {
+					char caracterActual = (char) dato;
+					dato = inputStreamReader.read();
+					texto+= "" + caracterActual;
 				}
-				if(str.length() > 0)
-					str = str.substring(0, str.length()-1);
-				texto +=str + "\n";
-				lector.close();
+				
 				//txtCodigo.getByIndex(getSelectedTab()).dato.setText(str);
 			}
 			else
 				System.out.print("El archivo no está listo para su lectura.");
-			archivo.close();
+			inputStreamReader.close();
 			final int tabs = getSelectedTab();
 			nuevaPestaña(texto, fichero.getPath(), fichero.getName(), texto.length());
 			tituloVentana.getByIndex(tabs).dato = getTitle();

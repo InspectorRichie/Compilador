@@ -15,7 +15,7 @@ import misc.Statics;
 public class AnalizadorLexico {
 	public static boolean analizaCodigoDesdeArchivo(ArrayList<String> listaDeImpresiones, ArrayList<Token> listaDeTokens, String ruta) {//Recibe la ruta del archivo
 		String lineaDeTexto="", token="";
-		int linea = 1, id = 1;
+		int linea = 1, id = 0;
 		StringTokenizer tokenizer;
 		boolean analisisCorrecto = true;
 		boolean vacio = true;
@@ -29,11 +29,12 @@ public class AnalizadorLexico {
 				while(tokenizer.hasMoreTokens()) {
 					vacio = false;
 					token = tokenizer.nextToken();
-					boolean bandera = analizarToken(token, linea, id++, listaDeImpresiones, listaDeTokens);//Y lo mando a analizar
+					boolean bandera = analizarToken(token, linea, id, listaDeImpresiones, listaDeTokens);//Y lo mando a analizar
 					if(analisisCorrecto)
 						analisisCorrecto = bandera; // si analisisCorrecto ya salió false una sola vez, ya no puede cambiarse
 					if(token.equals("//"))
 						break;
+					id++;
 				}
 				lineaDeTexto=archivoEntrada.readLine();
 				linea++;//Cuento el renglon
@@ -54,6 +55,8 @@ public class AnalizadorLexico {
 			System.out.println("Algo falló en el análisis léxico al leer el código.");
 			return false;
 		}
+		Token newToken = new Token(linea - 1, Statics.signoInt, listaDeTokens.size(), ";");
+		listaDeTokens.add(newToken);
 		if(analisisCorrecto && !vacio)
 			listaDeImpresiones.add(Statics.getHTML("<var><b>Código sin errores léxicos.", Statics.consolaCss));
 		return analisisCorrecto;
@@ -85,6 +88,13 @@ public class AnalizadorLexico {
 			tipo = Statics.llaveInt; // Es una llave
 		else if("//".equals(strToken))
 			return true;
+		
+		if(tipo == Statics.enteroInt) {
+			strToken = Integer.parseInt(strToken) + "";
+		}
+		else if(tipo == Statics.dobleInt) {
+			strToken = Double.parseDouble(strToken) + "";
+		}
 		
 		if(tipo==-1) { // No es ninguna de arriba
 			// Si entra aquí quiere decir que no es ninguna de las anteriores y paso analizarla letra por letra
@@ -163,6 +173,10 @@ public class AnalizadorLexico {
 						linea = linea.substring(0, i) + " " + linea.substring(i++, linea.length());
 						continue;
 					}
+				linea = linea.substring(0, i) + " " + linea.charAt(i) + " " + linea.substring(1+i, linea.length());
+				i+=2; // incrementa en dos i, para evadir los dos espacios añadidos
+			}
+			else if("+-*/".contains(linea.charAt(i) + "")) {
 				linea = linea.substring(0, i) + " " + linea.charAt(i) + " " + linea.substring(1+i, linea.length());
 				i+=2; // incrementa en dos i, para evadir los dos espacios añadidos
 			}

@@ -22,7 +22,8 @@ public class Statics {
 		enteroInt = 9,
 		parentesisInt = 10,
 		llaveInt = 11,
-		dobleInt = 12;
+		dobleInt = 12,
+		expresionAlgebraicaInt = 13;
 	public final static String [] tipoDeToken = {
 		"Palabra resevada", // 0
 		"Tipo de dato", // 1
@@ -37,6 +38,7 @@ public class Statics {
 		"Parentesis", // 10, ()
 		"Llave", // 11, {}
 		"Doble", // 12
+		"Expresion Algebraica", // 13
 	};
 	public final static String[]
 		alcance = {"global", "local"},
@@ -53,13 +55,26 @@ public class Statics {
 			+ "	font-style: italic;"
 			+ "}"
 			+ "p {" // para el error
-			+ "	color: #DD0000"
+			+ "	color: #DD0000;"
 			+ "}"
 			+ "em {" // para el warning
-			+ "	color: #888800"
+			+ "	color: #888800;"
 			+ "}"
 			+ "var {" // para lo verde bonito acá bien
-			+ "	color: #008800"
+			+ "	color: #008800;"
+			+ "}";
+	public final static String cuadruplosCss =
+			"strong {" // para destacar los titulos y las lineas
+			+ "	font-weight: plain;"
+			+ "	font-style: plain;"
+			+ "}"
+			+ "p {" // para destacar los titulos y las lineas
+			+ "	font-weight: plain;"
+			+ "	font-style: plain;"
+			+ "}"
+			+ "em {" // para el contenido de las celdas
+			+ "	font-weight: plain;"
+			+ "	font-style: plain;"
 			+ "}";
 	
 	///////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +135,54 @@ public class Statics {
 			return 5; // funcion
 		return -1;
 	}
+	
+	static public String centrarString(String texto, int caracteres) {
+		return centrarString(texto, caracteres, " ");
+	}
+	static public String centrarString(String texto, int caracteres, String relleno) {
+		int espaciosExtra = caracteres - texto.length();
+		for(int i=0 ; i < espaciosExtra ; i++) {
+			if(i % 2 == 0)
+				texto+=relleno;
+			else
+				texto = relleno + texto;
+		}
+		return texto;
+	}
+	static public int deTipoDeDatoATipoDeToken(int tipoDeDato) {
+		switch(tipoDeDato) {
+		case 0:
+			return Statics.enteroInt;
+		case 1:
+			return Statics.cadenaInt;
+		case 2:
+			return Statics.booleanoInt;
+		case 3:
+			return Statics.dobleInt;
+		case 4:
+			return Statics.claseInt;
+		}
+		return -1;
+	}
+
+	static public int getPEMDAS(String operador) { // 
+		switch(operador) {
+		/*
+		case "(": // Parentesis
+			return 0;
+		case "^": // Exponente
+			return 1;
+		*/
+		case "*": // Multiplicación
+		case "/": // División
+			return 2;
+		case "+": // Adición
+		case "-": // Sustracción
+			return 3;
+		}
+		return -1;
+	}
+
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   FUNCIONES DE INTERFAZ   

@@ -238,15 +238,19 @@ public class Escuchadores implements Serializable, ActionListener, KeyListener, 
 			String codigoAGuardar = vista.txtCodigo.getByIndex(tabs).dato.getText();
 			Statics.guardarArchivo(vista.archivoTemporal.getAbsolutePath(), codigoAGuardar);
 			ArrayList<Token> tokens = new ArrayList<Token>();
-			ArrayList<String> listaDeImpresiones = new ArrayList<String>();
+			ArrayList<String> listaDeImpresiones = new ArrayList<String>(),
+					listaDeCuadruplos = new ArrayList<String>();
 			boolean analisisCorrecto = AnalizadorLexico.analizaCodigoDesdeArchivo(listaDeImpresiones, tokens, vista.archivoTemporal.getAbsolutePath());
-			if(analisisCorrecto && codigoAGuardar.length() > 0) {
-				analisisCorrecto = AnalizadorSintactico.parentesisCorrectos(tokens, listaDeImpresiones);
-			}
-			if(analisisCorrecto && codigoAGuardar.length() > 0) {
-				analisisCorrecto = AnalizadorSemantico.analizarTokens(listaDeImpresiones, tokens, new HashMap<String, Identificador>(), vista.tablaDatos, vista.tituloTabla);
+			if(tokens.size() > 1) {
+				if(analisisCorrecto) {
+					analisisCorrecto = AnalizadorSintactico.analizaTokens(listaDeImpresiones, tokens);
+				}
+				if(analisisCorrecto) {
+					analisisCorrecto = AnalizadorSemantico.analizarTokens(listaDeImpresiones, listaDeCuadruplos, tokens, new HashMap<String, Identificador>(), vista.tablaDatos, vista.tituloTabla);
+				}
 			}
 			vista.consola.setListData(Statics.deArrayDinamicaAEstatica(listaDeImpresiones));
+			vista.cuadruplos.setListData(Statics.deArrayDinamicaAEstatica(listaDeCuadruplos));
 			
 			vista.hayError = !analisisCorrecto;
 			modificaTitulos();

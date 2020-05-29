@@ -42,7 +42,6 @@ public class PanelPestaña extends JPanel implements MouseListener {
 	    int btnWidth = iconoCerrarTab.getIconWidth(),
     		btnHeight = iconoCerrarTab.getIconHeight();
 	    
-	    //Image cerrarPestañaImg = iconoCerrarTab.getImage();
 	    etiqueta.setIcon(vista.icoCode);
 	    boton.setIcon(iconoCerrarTab);
 	    boton.setPreferredSize(new Dimension(btnWidth, btnHeight));
